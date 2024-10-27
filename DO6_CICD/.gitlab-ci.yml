@@ -1,0 +1,54 @@
+stages:
+  - build
+  - styletest
+  - tests
+  - delivery
+
+build-job:
+  stage: build
+  tags:
+    - runner 
+  script:
+    - make -C src/cat
+    - make -C src/grep
+  after_script:
+    bash tg.sh
+  artifacts:
+    paths:
+      - ~/s21_cat
+      - ~/s21_grep
+    expire_in: 30 days
+
+
+styletests-job:
+  stage: styletest
+  tags:
+    - runner
+  script:
+    - clang-format -Werror -style=Google src/cat/*.c src/grep/*.c -n
+  after_script:
+    bash tg.sh
+
+test-job:
+  stage: tests
+  tags:
+    - runner
+  script:
+    - mv ~/s21_cat ./src/
+    - bash src/cat/cat_test.sh
+    - mv ~/s21_grep ./src/
+    - bash src/grep/grep_test.sh
+  after_script:
+    bash tg.sh
+
+
+delivery-job:
+  stage: delivery
+  when: manual
+  tags:
+    - runner
+  script:
+    - chmod +x delivery.sh
+    - chmod +x access.sh
+    - ./access.sh
+  

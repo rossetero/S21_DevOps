@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+    part5:
+        build: ../part5/
+        container_name: server
+    proxy-nginx:
+        build: .
+        container_name: proxy
+        ports:
+            - 80:8080
